@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carta</title>
+
+<style>
+body{
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#2a0a12,#4a0d1a,#1a050a);
+  color:white;
+  overflow:hidden;
+}
+
+canvas{
+  position:fixed;
+  top:0;
+  left:0;
+  z-index:0;
+}
+
+.screen{
+  display:none;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  height:100vh;
+  text-align:center;
+  z-index:1;
+  position:relative;
+}
+
+.active{display:flex;}
+
+h2{
+  color:#ff4d6d;
+  text-shadow:0 0 15px #ff4d6d;
+}
+
+/* keypad */
+.keypad{
+  display:grid;
+  grid-template-columns:repeat(3,70px);
+  gap:12px;
+  margin-top:20px;
+}
+
+.key{
+  background:#3a0d16;
+  border:1px solid #ff4d6d;
+  color:#ff4d6d;
+  padding:15px;
+  font-size:20px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:.3s;
+}
+
+.key:hover{
+  background:#ff4d6d;
+  color:white;
+  transform:scale(1.1);
+  box-shadow:0 0 15px #ff4d6d;
+}
+
+.input-display{
+  font-size:28px;
+  letter-spacing:10px;
+}
+
+/* botones */
+.message-btn, .back-btn, #finalButton{
+  background:linear-gradient(135deg,#ff4d6d,#ff758f);
+  border:none;
+  border-radius:15px;
+  padding:14px 28px;
+  margin:10px;
+  font-size:16px;
+  color:white;
+  cursor:pointer;
+  transition:.3s;
+}
+
+.message-btn:hover, .back-btn:hover, #finalButton:hover{
+  transform:scale(1.1);
+  box-shadow:0 0 20px #ff4d6d;
+}
+
+/* tarjetas */
+.messages-container{
+  display:grid;
+  grid-template-columns: repeat(2, 160px);
+  gap:20px;
+  justify-content:center;
+  margin-top:20px;
+}
+
+.card{
+  background:linear-gradient(135deg,#ff4d6d,#ff758f);
+  border-radius:15px;
+  padding:20px;
+  font-size:16px;
+  cursor:pointer;
+  transition:.3s;
+  box-shadow:0 0 20px rgba(255,77,109,.4);
+}
+
+.card:hover{
+  transform:scale(1.1);
+  box-shadow:0 0 25px #ff4d6d;
+}
+
+.card3{
+  grid-column: span 2;
+}
+
+/* mensajes individuales */
+.msg1{
+  background:#ff758f;
+  padding:20px;
+  border-radius:20px 20px 20px 5px;
+  max-width:300px;
+  animation:pop .5s ease;
+}
+
+.msg2{
+  background:#fff0f5;
+  color:#7a1c2e;
+  padding:25px;
+  border-radius:10px;
+  box-shadow:0 0 20px rgba(255,77,109,.4);
+  font-style:italic;
+  max-width:320px;
+  animation:fade .6s ease;
+}
+
+.msg3{
+  border:2px solid #ff4d6d;
+  padding:25px;
+  border-radius:20px;
+  box-shadow:0 0 20px #ff4d6d;
+  max-width:320px;
+  animation:zoom .5s ease;
+}
+
+@keyframes pop{
+  from{transform:scale(.5);opacity:0;}
+  to{transform:scale(1);opacity:1;}
+}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;}
+}
+
+@keyframes zoom{
+  from{transform:scale(0.7);opacity:0;}
+  to{transform:scale(1);}
+}
+
+/* carta final */
+.notepad{
+  max-width:420px;
+  padding:30px;
+  border-radius:20px;
+  background:#fff0f5;
+  color:#5a0f1f;
+  text-align:justify;
+  box-shadow:0 0 30px rgba(255,77,109,.5);
+  animation:fade 1s ease;
+}
+
+/* boton regresar especial */
+#backSpecial{
+  background:linear-gradient(135deg,#ff758f,#ff4d6d);
+  border:none;
+  border-radius:15px;
+  padding:14px 28px;
+  margin-top:10px;
+  font-size:18px;
+  color:white;
+  cursor:pointer;
+  width:200px;
+  transition:.3s;
+}
+
+#backSpecial:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 20px #ff4d6d;
+}
+
+/* boton abrir carta mas grande */
+#finalButton{
+  width:240px;
+  font-size:18px;
+  padding:18px 28px;
+  margin-top:15px;
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<!-- PANTALLA CONTRASEÑA -->
+<div id="passwordScreen" class="screen active">
+  <h2>Ingrese la contraseña🔒</h2>
+  <div class="input-display" id="inputDisplay">••••</div>
+  <div class="keypad">
+    <button class="key" onclick="enterDigit('1')">1</button>
+    <button class="key" onclick="enterDigit('2')">2</button>
+    <button class="key" onclick="enterDigit('3')">3</button>
+    <button class="key" onclick="enterDigit('4')">4</button>
+    <button class="key" onclick="enterDigit('5')">5</button>
+    <button class="key" onclick="enterDigit('6')">6</button>
+    <button class="key" onclick="enterDigit('7')">7</button>
+    <button class="key" onclick="enterDigit('8')">8</button>
+    <button class="key" onclick="enterDigit('9')">9</button>
+    <div></div>
+    <button class="key" onclick="enterDigit('0')">0</button>
+    <button class="key" onclick="deleteDigit()">⌫</button>
+  </div>
+</div>
+
+<!-- PANTALLA MENSAJES -->
+<div id="messageScreen" class="screen">
+  <h2 id="messageTitle">Mensajitos para el amor de mi vida♥️</h2>
+
+  <div class="messages-container" id="messageCards">
+    <div class="card" onclick="showMessage(1)">Mensaje 1</div>
+    <div class="card" onclick="showMessage(2)">Mensaje 2</div>
+    <div class="card card3" onclick="showMessage(3)">Mensaje 3</div>
+  </div>
+
+  <button id="finalButton" style="display:none;" onclick="openFinalCard()">Abrir carta</button>
+  <button id="backSpecial" style="display:none;" onclick="backToMessageScreen()">Regresar</button>
+  <button id="backToPassword" class="back-btn" style="margin-top:15px;" onclick="backToPasswordScreen()">Regresar a contraseña</button>
+</div>
+
+<!-- MENSAJE INDIVIDUAL -->
+<div id="singleMessageScreen" class="screen">
+  <div id="singleMessageText"></div>
+  <button class="back-btn" onclick="backToMessages()">Regresar</button>
+</div>
+
+<!-- CARTA FINAL -->
+<div id="notepadScreen" class="screen">
+  <div class="notepad">
+    <h3>28 Marzo 2026 📅</h3>
+    <h4>Mi princesa hermosa 💌</h4>
+    <p>Bueno mi reina, le quería agradecer por todo lo que ha hecho hasta el momento x mi, el hacerme tan feliz en tan poco tiempo, nunca le había agarrado tanto cariño a alguien en mi vida, y menos en tan poco tiempo.</p>
+    <p>Es una persona increíble, mi niña linda, me encanta su personalidad, su hermosura, su paciencia, y todo si eres perfecta, y sé que cuando nos conozcamos en persona y ojalá sea pronto, me va a sorprender mucho más de lo que ya lo ha hecho.</p>
+    <p>Es la niña que siempre quise conocer y que finalmente conocí y no puedo estar más agradecido de eso. Lo único que le quiero pedir es que por favor no me deje nunca, por nada.</p>
+    <p>Y bueno, recordarle que es una niña súper hermosa y que ojalá nos sigamos conociendo mucho más porque yo la quiero para toda la vida. Te adoro demasiado, mi niña preciosa, gracias por todo❤️</p>
+    <p>La adoro con mi vida. ♡</p>
+    <button class="back-btn" onclick="backToMessagesFinal()">Regresar</button>
+  </div>
+</div>
+
+<script>
+const correctPassword='2001';
+let input='';
+
+function enterDigit(d){
+  if(input.length<4) input+=d;
+  document.getElementById('inputDisplay').textContent=input.padEnd(4,'•');
+
+  if(input.length===4){
+    if(input===correctPassword){
+      document.getElementById('passwordScreen').classList.remove('active');
+      document.getElementById('messageScreen').classList.add('active');
+    }else{
+      alert('Contraseña incorrecta, intenta de nuevo');
+      input='';
+      document.getElementById('inputDisplay').textContent='••••';
+    }
+  }
+}
+
+function deleteDigit(){
+  input=input.slice(0,-1);
+  document.getElementById('inputDisplay').textContent=input.padEnd(4,'•');
+}
+
+const messages=[
+"Eres la niña mas lindaa nunca lo olvide❣️",
+"Gracias por estar en mi vida y hacerme tan feli 💙",
+"Siempre estare para usted pase lo que pase ❤️"
+];
+
+let clicked=[false,false,false];
+
+function showMessage(n){
+  document.getElementById('messageScreen').classList.remove('active');
+  document.getElementById('singleMessageScreen').classList.add('active');
+
+  const box=document.getElementById('singleMessageText');
+  box.className='';
+
+  if(n===1) box.classList.add('msg1');
+  if(n===2) box.classList.add('msg2');
+  if(n===3) box.classList.add('msg3');
+
+  box.textContent=messages[n-1];
+
+  clicked[n-1]=true;
+
+  if(clicked.every(v=>v)){
+    document.getElementById('messageCards').style.display='none';
+    document.getElementById('finalButton').style.display='inline-block';
+    document.getElementById('backSpecial').style.display='inline-block';
+    document.getElementById('messageTitle').textContent="Has desbloqueado un mensaje especial 💖";
+
+    // Ocultar botón de contraseña
+    document.getElementById('backToPassword').style.display='none';
+  }
+}
+
+function backToMessages(){
+  document.getElementById('singleMessageScreen').classList.remove('active');
+  document.getElementById('messageScreen').classList.add('active');
+}
+
+function backToMessageScreen(){
+  document.getElementById('messageCards').style.display='grid';
+  document.getElementById('finalButton').style.display='none';
+  document.getElementById('backSpecial').style.display='none';
+  document.getElementById('messageTitle').textContent="Mensajitos para usted♥️";
+
+  // Mostrar nuevamente el botón de contraseña
+  document.getElementById('backToPassword').style.display='inline-block';
+}
+
+function backToPasswordScreen(){
+  document.getElementById('messageScreen').classList.remove('active');
+  document.getElementById('passwordScreen').classList.add('active');
+  input='';
+  document.getElementById('inputDisplay').textContent='••••';
+}
+
+function backToMessagesFinal(){
+  document.getElementById('notepadScreen').classList.remove('active');
+  document.getElementById('messageScreen').classList.add('active');
+}
+
+function openFinalCard(){
+  document.getElementById('messageScreen').classList.remove('active');
+  document.getElementById('notepadScreen').classList.add('active');
+}
+
+/* corazones flotando */
+const canvas=document.getElementById('bgCanvas');
+const ctx=canvas.getContext('2d');
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+
+const hearts=[];
+for(let i=0;i<40;i++){
+  hearts.push({
+    x:Math.random()*canvas.width,
+    y:Math.random()*canvas.height,
+    size:Math.random()*15+10,
+    speed:Math.random()*1+0.5
+  });
+}
+
+function drawHeart(x,y,s){
+  ctx.beginPath();
+  ctx.moveTo(x,y);
+  ctx.bezierCurveTo(x,y-3*s,x-3*s,y-3*s,x-3*s,y);
+  ctx.bezierCurveTo(x-3*s,y+3*s,x,y+4*s,x,y+5*s);
+  ctx.bezierCurveTo(x,y+4*s,x+3*s,y+3*s,x+3*s,y);
+  ctx.bezierCurveTo(x+3*s,y-3*s,x,y-3*s,x,y);
+  ctx.fillStyle="#ff4d6d";
+  ctx.fill();
+}
+
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  hearts.forEach(h=>{
+    drawHeart(h.x,h.y,h.size/10);
+    h.y-=h.speed;
+    if(h.y<0){
+      h.y=canvas.height;
+      h.x=Math.random()*canvas.width;
+    }
+  });
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+
+</body>
+</html>
